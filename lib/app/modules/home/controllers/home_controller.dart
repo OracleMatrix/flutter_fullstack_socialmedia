@@ -4,6 +4,7 @@ import 'package:fullstack_socialmedia/app/modules/home/Models/get_all_posts_mode
 import 'package:fullstack_socialmedia/app/modules/home/providers/comment_on_post_provider.dart';
 import 'package:fullstack_socialmedia/app/modules/home/providers/create_post_provider.dart';
 import 'package:fullstack_socialmedia/app/modules/home/providers/delete_post_provider.dart';
+import 'package:fullstack_socialmedia/app/modules/home/providers/dislike_post_provider.dart';
 import 'package:fullstack_socialmedia/app/modules/home/providers/get_all_posts_provider.dart';
 import 'package:fullstack_socialmedia/app/modules/home/providers/like_post_provider.dart';
 import 'package:get/get.dart';
@@ -58,6 +59,11 @@ class HomeController extends GetxController {
 
   set commentOnPostProvider(var value) => _commentOnPostProvider = value;
 
+  var _dislikePostProvider = DislikePostProvider();
+  get dislikePostProvider => _dislikePostProvider;
+
+  set dislikePostProvider(var value) => _dislikePostProvider = value;
+
   Future getAllPosts() async {
     try {
       _isLoading.value = true;
@@ -75,6 +81,23 @@ class HomeController extends GetxController {
       );
     } finally {
       _isLoading.value = false;
+    }
+  }
+
+  Future refreshPosts() async {
+    try {
+      final data = await _getAllPostsProvider.getAllPosts();
+      if (data != null) {
+        postsData.value = data;
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        icon: Icon(Icons.error, color: Colors.white),
+      );
     }
   }
 
@@ -123,7 +146,7 @@ class HomeController extends GetxController {
           colorText: Colors.white,
           icon: Icon(Icons.check_circle, color: Colors.white),
         );
-        getAllPosts();
+        refreshPosts();
       }
     } catch (e) {
       Get.snackbar(
@@ -140,14 +163,13 @@ class HomeController extends GetxController {
 
   Future likePost(int postId) async {
     try {
-      _isLoading.value = true;
       final data = {
         'userId': await GetStorage().read(Constants.idKey),
         'postId': postId,
       };
       final response = await _likePostProvider.likePost(data);
       if (response != null) {
-        getAllPosts();
+        refreshPosts();
       }
     } catch (e) {
       Get.snackbar(
@@ -157,14 +179,11 @@ class HomeController extends GetxController {
         colorText: Colors.white,
         icon: Icon(Icons.error, color: Colors.white),
       );
-    } finally {
-      _isLoading.value = false;
     }
   }
 
   Future createComment(int postId) async {
     try {
-      _isLoading.value = true;
       final data = {
         'userId': await GetStorage().read(Constants.idKey),
         'postId': postId,
@@ -180,7 +199,7 @@ class HomeController extends GetxController {
           icon: Icon(Icons.check_circle, color: Colors.white),
         );
         _commentController.value.clear();
-        getAllPosts();
+        refreshPosts();
       }
     } catch (e) {
       Get.snackbar(
@@ -190,8 +209,23 @@ class HomeController extends GetxController {
         colorText: Colors.white,
         icon: Icon(Icons.error, color: Colors.white),
       );
-    } finally {
-      _isLoading.value = false;
+    }
+  }
+
+  Future disLikePost(int likeId) async {
+    try {
+      final data = await _dislikePostProvider.dislikePost(likeId);
+      if (data != null) {
+        refreshPosts();
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        icon: Icon(Icons.error, color: Colors.white),
+      );
     }
   }
 }
