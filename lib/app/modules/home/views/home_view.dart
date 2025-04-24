@@ -83,8 +83,13 @@ class HomeView extends GetView<HomeController> {
                 (element) =>
                     element.user?.id == GetStorage().read(Constants.idKey),
               );
-
+              final isPostOwner =
+                  post.user?.id == GetStorage().read(Constants.idKey);
               return Card(
+                color:
+                    isPostOwner
+                        ? Colors.lightBlue.shade800
+                        : Colors.grey.shade900,
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -187,7 +192,7 @@ class HomeView extends GetView<HomeController> {
           post.createdAt != null
               ? timeago.format(post.createdAt ?? DateTime.now())
               : '',
-          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          style: TextStyle(color: Colors.grey[400], fontSize: 12),
         ),
         PullDownButton(
           itemBuilder: (context) {
@@ -455,7 +460,7 @@ class CommentsSection extends StatelessWidget {
       },
       child: Row(
         children: [
-          Icon(Icons.comment, color: Colors.grey[700], size: 20),
+          Icon(Icons.comment, color: Colors.grey[500], size: 20),
           const SizedBox(width: 4),
           Text(
             '$commentsCount',
